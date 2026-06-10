@@ -1,4 +1,4 @@
-import { YoutubeTranscript } from "youtube-transcript";
+import { fetchTranscriptText } from "@/lib/transcript";
 
 const VIDEO_ID_PATTERNS = [
   /(?:youtube\.com\/watch\?v=|youtube\.com\/watch\?.+&v=)([a-zA-Z0-9_-]{11})/,
@@ -28,30 +28,12 @@ export async function getTranscriptText(videoId: string): Promise<string> {
   console.log("[youtube] Fetching transcript for video ID:", videoId);
 
   try {
-    const segments = await YoutubeTranscript.fetchTranscript(videoId);
-    console.log("[youtube] Received", segments.length, "transcript segments");
-
-    if (!segments.length) {
-      console.log("[youtube] No transcript segments returned");
-      throw new Error("Video này không có phụ đề tiếng Anh.");
-    }
-
-    const text = segments
-      .map((segment) => segment.text.replace(/\s+/g, " ").trim())
-      .filter(Boolean)
-      .join(" ");
-
-    if (!text) {
-      console.log("[youtube] Transcript segments were empty after joining");
-      throw new Error("Phụ đề của video này trống.");
-    }
-
+    const text = await fetchTranscriptText(videoId);
     console.log(
       "[youtube] Transcript fetched successfully, length:",
       text.length,
       "chars",
     );
-
     return text;
   } catch (error) {
     console.error("[youtube] Transcript fetch failed:", error);
