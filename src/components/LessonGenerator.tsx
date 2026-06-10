@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import FluentLogo from "@/components/FluentLogo";
 import LessonDisplay from "@/components/LessonDisplay";
+import { DAILY_LIMIT, useDailyLimit } from "@/lib/useDailyLimit";
 import type { GenerateLessonResponse } from "@/types/lesson";
 
 export default function LessonGenerator() {
@@ -12,8 +13,15 @@ export default function LessonGenerator() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateLessonResponse | null>(null);
 
+  const { remaining, limitReached, hydrated, increment } = useDailyLimit();
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (limitReached) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setResult(null);
@@ -34,6 +42,7 @@ export default function LessonGenerator() {
       }
 
       setResult(data);
+      increment();
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -75,20 +84,38 @@ export default function LessonGenerator() {
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="Dán link YouTube vào đây..."
-            className="min-w-0 flex-1 rounded-2xl border-2 border-border bg-background px-4 py-4 text-base font-semibold text-heading outline-none placeholder:text-muted transition ease-smooth focus:border-primary"
+            disabled={limitReached}
+            className="min-w-0 flex-1 rounded-2xl border-2 border-border bg-background px-4 py-4 text-base font-semibold text-heading outline-none placeholder:text-muted transition ease-smooth focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="submit"
-            disabled={loading || !url.trim()}
+            disabled={loading || !url.trim() || limitReached}
             className="rounded-2xl bg-primary px-10 py-5 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
           >
             {loading ? "Đang tạo bài học..." : "Bắt đầu"}
           </button>
         </div>
-        <p className="mt-4 text-center text-sm text-body sm:text-left">
-          Hoạt động tốt nhất với video có phụ đề tiếng Anh.
-        </p>
+
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-body">
+            Hoạt động tốt nhất với video có phụ đề tiếng Anh.
+          </p>
+          {hydrated ? (
+            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-highlight px-3 py-1 text-sm font-bold text-primary">
+              Còn lại: {remaining}/{DAILY_LIMIT} lượt hôm nay
+            </span>
+          ) : null}
+        </div>
       </form>
+
+      {limitReached ? (
+        <div
+          role="alert"
+          className="rounded-2xl border-2 border-border bg-highlight px-5 py-4 text-center text-base font-bold text-heading"
+        >
+          Bạn đã dùng hết 3 lượt hôm nay. Quay lại ngày mai nhé! 🌟
+        </div>
+      ) : null}
 
       {error ? (
         <div
