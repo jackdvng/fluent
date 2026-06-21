@@ -36,6 +36,26 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
   const [canExpandSummary, setCanExpandSummary] = useState(false);
   const summaryRef = useRef<HTMLParagraphElement>(null);
 
+  const navRef = useRef<HTMLElement>(null);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(false);
+
+  const updateFades = useCallback(() => {
+    const el = navRef.current;
+    if (!el) {
+      return;
+    }
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setShowLeftFade(scrollLeft > 4);
+    setShowRightFade(scrollLeft + clientWidth < scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateFades();
+    window.addEventListener("resize", updateFades);
+    return () => window.removeEventListener("resize", updateFades);
+  }, [updateFades]);
+
   useEffect(() => {
     const el = summaryRef.current;
     if (el && !summaryExpanded) {
@@ -180,11 +200,14 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
         </div>
       </header>
 
-      <nav
-        aria-label="Các phần bài học"
-        className="mb-6 flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {TABS.map((tab) => {
+      <div className="relative -mx-2 mb-4">
+        <nav
+          ref={navRef}
+          onScroll={updateFades}
+          aria-label="Các phần bài học"
+          className="flex gap-2.5 overflow-x-auto px-2 pb-5 pt-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const { done, total } = tabProgress(tab.id);
           const isComplete = total > 0 && done >= total;
@@ -194,7 +217,7 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
               key={tab.id}
               type="button"
               onClick={() => selectTab(tab.id)}
-              className={`flex shrink-0 items-center rounded-full border-2 px-3.5 py-3 text-sm font-extrabold transition ease-smooth ${
+              className={`flex shrink-0 items-center rounded-full border-2 px-3 py-2.5 text-xs font-extrabold transition ease-smooth sm:px-3.5 sm:py-3 sm:text-sm ${
                 isActive
                   ? "scale-[1.03] border-primary bg-primary text-white shadow-[0_4px_0_#CA2851,0_8px_18px_rgba(202,40,81,0.3)]"
                   : "border-border bg-tab-inactive text-body hover:border-primary hover:text-primary"
@@ -217,8 +240,44 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
               ) : null}
             </button>
           );
-        })}
-      </nav>
+          })}
+        </nav>
+
+        {showLeftFade ? (
+          <div className="pointer-events-none absolute bottom-0 left-0 top-0 flex items-center bg-gradient-to-r from-card via-card/80 to-transparent pl-2 pr-6 text-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M15 18l-6-6 6-6"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        ) : null}
+
+        {showRightFade ? (
+          <div className="pointer-events-none absolute bottom-0 right-0 top-0 flex items-center justify-end bg-gradient-to-l from-card via-card/80 to-transparent pl-6 pr-2 text-primary">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              className="animate-pulse"
+            >
+              <path
+                d="M9 6l6 6-6 6"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        ) : null}
+      </div>
 
       <div className="min-h-[320px]">
         {activeTab === "vocabulary" ? (
