@@ -104,6 +104,11 @@ export default function LessonGenerator() {
         <p className="mt-4 text-center text-sm text-body sm:text-left">
           Hoạt động tốt nhất với video có phụ đề tiếng Anh.
         </p>
+        {hydrated ? (
+          <p className="mt-2 text-center text-xs font-bold text-primary sm:text-left">
+            Còn lại: {remaining}/{DAILY_LIMIT} lượt hôm nay
+          </p>
+        ) : null}
       </form>
 
       {limitReached ? (
