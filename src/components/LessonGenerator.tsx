@@ -56,16 +56,11 @@ export default function LessonGenerator() {
   return (
     <div className="mx-auto flex w-full max-w-[960px] flex-col gap-10 px-5 py-12 sm:px-6">
       <header className="relative space-y-4 text-center">
-        {hydrated ? (
-          <span className="mx-auto flex w-fit items-center gap-1 rounded-full border-2 border-border bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm sm:absolute sm:right-0 sm:top-0 sm:mx-0">
-            Còn lại: {remaining}/{DAILY_LIMIT} lượt hôm nay
-          </span>
-        ) : null}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logo.png"
           alt="Fluent"
-          className="mx-auto h-16 w-auto"
+          className="mx-auto mb-2 h-16 w-auto"
           style={{ filter: "drop-shadow(0 0 20px rgba(255, 103, 102, 0.3))" }}
         />
         <h1 className="text-4xl font-extrabold tracking-tight text-heading">
