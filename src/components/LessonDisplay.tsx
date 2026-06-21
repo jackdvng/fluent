@@ -200,12 +200,12 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
         </div>
       </header>
 
-      <div className="relative -mx-2 mb-4">
+      <div className="relative -mx-6 mb-4 sm:-mx-8">
         <nav
           ref={navRef}
           onScroll={updateFades}
           aria-label="Các phần bài học"
-          className="flex gap-2.5 overflow-x-auto px-2 pb-5 pt-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-2.5 overflow-x-auto px-6 pb-7 pt-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-8"
         >
           {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
