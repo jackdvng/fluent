@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import FluentLogo from "@/components/FluentLogo";
 import LessonDisplay from "@/components/LessonDisplay";
 import { DAILY_LIMIT, useDailyLimit } from "@/lib/useDailyLimit";
 import type { GenerateLessonResponse } from "@/types/lesson";
@@ -62,7 +61,13 @@ export default function LessonGenerator() {
             Còn lại: {remaining}/{DAILY_LIMIT} lượt hôm nay
           </span>
         ) : null}
-        <FluentLogo size={64} className="mx-auto" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.png"
+          alt="Fluent"
+          className="mx-auto h-16 w-auto"
+          style={{ filter: "drop-shadow(0 0 20px rgba(255, 103, 102, 0.3))" }}
+        />
         <h1 className="text-4xl font-extrabold tracking-tight text-heading">
           Fluent
         </h1>
