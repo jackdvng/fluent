@@ -56,7 +56,12 @@ export default function LessonGenerator() {
 
   return (
     <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-5 py-12 sm:px-6">
-      <header className="space-y-4 text-center">
+      <header className="relative space-y-4 text-center">
+        {hydrated ? (
+          <span className="mx-auto flex w-fit items-center gap-1 rounded-full border-2 border-border bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm sm:absolute sm:right-0 sm:top-0 sm:mx-0">
+            Còn lại: {remaining}/{DAILY_LIMIT} lượt hôm nay
+          </span>
+        ) : null}
         <FluentLogo size={64} className="mx-auto" />
         <h1 className="text-4xl font-extrabold tracking-tight text-heading">
           Fluent
@@ -96,16 +101,9 @@ export default function LessonGenerator() {
           </button>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-body">
-            Hoạt động tốt nhất với video có phụ đề tiếng Anh.
-          </p>
-          {hydrated ? (
-            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-highlight px-3 py-1 text-sm font-bold text-primary">
-              Còn lại: {remaining}/{DAILY_LIMIT} lượt hôm nay
-            </span>
-          ) : null}
-        </div>
+        <p className="mt-4 text-center text-sm text-body sm:text-left">
+          Hoạt động tốt nhất với video có phụ đề tiếng Anh.
+        </p>
       </form>
 
       {limitReached ? (

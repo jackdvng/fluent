@@ -1,0 +1,27 @@
+[project]
+name = "crossref"
+version = "0.1.0"
+description = "Crossref - a multi-agent research cross-checking system built on Band (band.ai)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "band-sdk[anthropic,langgraph]>=0.2.7",
+    "langchain-openai>=0.2.0",
+    "tavily-python>=0.5.0",
+    "requests>=2.32.0",
+    "youtube-transcript-api>=1.0.0",
+    "google-api-python-client>=2.140.0",
+    "python-dotenv>=1.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]

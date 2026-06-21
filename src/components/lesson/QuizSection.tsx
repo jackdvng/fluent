@@ -6,6 +6,7 @@ import type { QuizQuestion } from "@/types/lesson";
 
 interface QuizSectionProps {
   questions: QuizQuestion[];
+  onAnswer?: (index: number) => void;
 }
 
 function CelebrationOverlay() {
@@ -29,7 +30,7 @@ function CelebrationOverlay() {
   );
 }
 
-export default function QuizSection({ questions }: QuizSectionProps) {
+export default function QuizSection({ questions, onAnswer }: QuizSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -55,6 +56,7 @@ export default function QuizSection({ questions }: QuizSectionProps) {
     }
 
     setSelectedOption(optionIndex);
+    onAnswer?.(currentIndex);
 
     if (optionIndex === currentQuestion.correctAnswer) {
       setScore((value) => value + 1);

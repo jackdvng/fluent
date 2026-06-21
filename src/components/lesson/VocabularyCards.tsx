@@ -8,9 +8,13 @@ const STAGGER_MS = 150;
 
 interface VocabularyCardsProps {
   items: VocabularyItem[];
+  onReview?: (word: string) => void;
 }
 
-export default function VocabularyCards({ items }: VocabularyCardsProps) {
+export default function VocabularyCards({
+  items,
+  onReview,
+}: VocabularyCardsProps) {
   const [flippedWord, setFlippedWord] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -26,6 +30,8 @@ export default function VocabularyCards({ items }: VocabularyCardsProps) {
         return;
       }
 
+      onReview?.(word);
+
       if (flippedWord !== null) {
         setFlippedWord(null);
         timeoutRef.current = setTimeout(() => {
@@ -37,7 +43,7 @@ export default function VocabularyCards({ items }: VocabularyCardsProps) {
 
       setFlippedWord(word);
     },
-    [flippedWord],
+    [flippedWord, onReview],
   );
 
   return (
