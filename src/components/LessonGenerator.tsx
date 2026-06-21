@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import LessonDisplay from "@/components/LessonDisplay";
+import { SAMPLE_LESSON } from "@/lib/sampleLesson";
 import { DAILY_LIMIT, useDailyLimit } from "@/lib/useDailyLimit";
 import type { GenerateLessonResponse } from "@/types/lesson";
 
@@ -11,11 +12,27 @@ export default function LessonGenerator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateLessonResponse | null>(null);
+  const [devMode, setDevMode] = useState(false);
 
   const { remaining, limitReached, hydrated, increment } = useDailyLimit();
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("dev") === "true") {
+      setDevMode(true);
+      setResult(SAMPLE_LESSON);
+    }
+  }, []);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    // Dev mode: skip the Claude API and load dummy data (no credits used).
+    if (devMode) {
+      setError(null);
+      setResult(SAMPLE_LESSON);
+      return;
+    }
 
     if (limitReached) {
       return;
@@ -69,6 +86,11 @@ export default function LessonGenerator() {
         <p className="mx-auto max-w-xl text-base leading-7 text-body">
           Biến mọi video YouTube thành bài học tiếng Anh
         </p>
+        {devMode ? (
+          <span className="mx-auto flex w-fit items-center gap-1 rounded-full border-2 border-primary bg-primary px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
+            🛠️ Dev mode — dữ liệu mẫu
+          </span>
+        ) : null}
       </header>
 
       <form
@@ -85,16 +107,16 @@ export default function LessonGenerator() {
           <input
             id="youtube-url"
             type="url"
-            required
+            required={!devMode}
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="Dán link YouTube vào đây..."
-            disabled={limitReached}
+            disabled={limitReached && !devMode}
             className="min-w-0 flex-1 rounded-2xl border-2 border-border bg-background px-4 py-4 text-base font-semibold text-heading outline-none placeholder:text-muted transition ease-smooth focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="submit"
-            disabled={loading || !url.trim() || limitReached}
+            disabled={loading || (!devMode && (!url.trim() || limitReached))}
             className="rounded-2xl bg-primary px-10 py-5 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
           >
             {loading ? "Đang tạo bài học..." : "Bắt đầu"}
