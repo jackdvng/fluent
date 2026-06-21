@@ -55,7 +55,7 @@ export default function LessonGenerator() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-10 px-5 py-12 sm:px-6">
+    <div className="mx-auto flex w-full max-w-[960px] flex-col gap-10 px-5 py-12 sm:px-6">
       <header className="relative space-y-4 text-center">
         {hydrated ? (
           <span className="mx-auto flex w-fit items-center gap-1 rounded-full border-2 border-border bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm sm:absolute sm:right-0 sm:top-0 sm:mx-0">

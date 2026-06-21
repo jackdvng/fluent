@@ -194,7 +194,7 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
               key={tab.id}
               type="button"
               onClick={() => selectTab(tab.id)}
-              className={`flex shrink-0 items-center rounded-full border-2 px-5 py-3 text-sm font-extrabold transition ease-smooth ${
+              className={`flex shrink-0 items-center rounded-full border-2 px-3.5 py-3 text-sm font-extrabold transition ease-smooth ${
                 isActive
                   ? "scale-[1.03] border-primary bg-primary text-white shadow-[0_4px_0_#CA2851,0_8px_18px_rgba(202,40,81,0.3)]"
                   : "border-border bg-tab-inactive text-body hover:border-primary hover:text-primary"
@@ -204,7 +204,7 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
               {tab.label}
               {total > 0 ? (
                 <span
-                  className={`ml-2 inline-flex min-w-[2.25rem] items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold ${
+                  className={`ml-2 inline-flex min-w-[2rem] items-center justify-center rounded-full px-2 py-0.5 text-xs font-bold ${
                     isActive
                       ? "bg-white/25 text-white"
                       : isComplete
