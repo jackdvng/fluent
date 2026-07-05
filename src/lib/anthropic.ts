@@ -36,7 +36,7 @@ The JSON must match this schema exactly:
   "quiz": [
     {
       "question": "quiz question in Vietnamese",
-      "options": ["English option A", "English option B", "English option C", "English option D"],
+      "options": ["Vietnamese option A", "Vietnamese option B", "Vietnamese option C", "Vietnamese option D"],
       "correctAnswer": 0,
       "explanation": "explanation in Vietnamese"
     }
@@ -45,7 +45,7 @@ The JSON must match this schema exactly:
 
 Language rules:
 - title and summary MUST be entirely in Vietnamese
-- vocabulary.word, idiomsAndSlang.phrase, exampleSentences.sentence, and quiz options MUST be in English (the content being taught)
+- vocabulary.word, idiomsAndSlang.phrase, and exampleSentences.sentence MUST be in English (the content being taught)
 - definitions, meanings, notes, quiz questions, and explanations MUST be in Vietnamese
 - context field may be a short English quote from the transcript
 
@@ -61,7 +61,7 @@ CRITICAL — Quiz rules:
 - NEVER ask about the video's story, plot, events, people, places, times, or factual details (e.g. "mấy giờ họ thức dậy?", "họ đi đâu?", "chuyện gì xảy ra tiếp theo?")
 - ALL quiz questions MUST test English language knowledge only: vocabulary meanings, grammar usage, idiom/slang meanings, choosing the correct word/phrase, fill-in-the-blank, or identifying correct usage
 - Every question must test whether the learner understands an English word, phrase, or grammar pattern from THIS lesson
-- Quiz question text must be in Vietnamese; quiz options should be in English
+- Quiz question text must be in Vietnamese; quiz answer options must ALL be in Vietnamese (they are translations/explanations of the English word being tested)
 - Good example: "Từ 'break the ice' có nghĩa là gì?" with English idiom options
 - Bad example: "Trong video, họ đi đâu sau bữa sáng?"`;
 
