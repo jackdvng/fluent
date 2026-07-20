@@ -96,7 +96,7 @@ export default function QuizSection({ questions, onAnswer }: QuizSectionProps) {
         <button
           type="button"
           onClick={resetQuiz}
-          className="mt-8 rounded-2xl bg-primary px-8 py-4 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
+          className="mt-8 cursor-pointer rounded-2xl bg-primary px-8 py-4 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
         >
           Làm lại
         </button>
@@ -163,7 +163,7 @@ export default function QuizSection({ questions, onAnswer }: QuizSectionProps) {
                   type="button"
                   disabled={hasAnswered}
                   onClick={() => handleSelect(optionIndex)}
-                  className={`w-full rounded-2xl border-2 px-5 py-4 text-left text-base font-bold transition ease-smooth disabled:cursor-default ${optionClass}`}
+                  className={`w-full cursor-pointer rounded-2xl border-2 px-5 py-4 text-left text-base font-bold transition ease-smooth disabled:cursor-default ${optionClass}`}
                 >
                   <span className="mr-3 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-background text-sm font-extrabold text-body">
                     {String.fromCharCode(65 + optionIndex)}
@@ -197,7 +197,7 @@ export default function QuizSection({ questions, onAnswer }: QuizSectionProps) {
             <button
               type="button"
               onClick={handleNext}
-              className="w-full rounded-2xl bg-primary px-6 py-4 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
+              className="w-full cursor-pointer rounded-2xl bg-primary px-6 py-4 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
             >
               {currentIndex >= questions.length - 1 ? "Xem kết quả" : "Tiếp tục"}
             </button>

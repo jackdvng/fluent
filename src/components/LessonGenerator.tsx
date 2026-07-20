@@ -178,7 +178,7 @@ export default function LessonGenerator() {
           <button
             type="submit"
             disabled={loading || (!devMode && !url.trim()) || blockedByLimit}
-            className="rounded-2xl bg-primary px-10 py-5 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
+            className="cursor-pointer rounded-2xl bg-primary px-10 py-5 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
           >
             {loading ? "Đang tạo bài học..." : "Bắt đầu"}
           </button>
@@ -231,7 +231,7 @@ export default function LessonGenerator() {
                     type="button"
                     onClick={() => void handleLicenseSubmit()}
                     disabled={licenseStatus === "validating" || !licenseInput.trim()}
-                    className="rounded-xl bg-primary px-6 py-3 text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                    className="cursor-pointer rounded-xl bg-primary px-6 py-3 text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                   >
                     {licenseStatus === "validating" ? "Đang kiểm tra..." : "Kích hoạt"}
                   </button>
@@ -253,7 +253,7 @@ export default function LessonGenerator() {
                 <button
                   type="button"
                   onClick={() => setShowLicenseInput(true)}
-                  className="text-xs font-bold text-primary underline-offset-2 transition ease-smooth hover:underline"
+                  className="cursor-pointer text-xs font-bold text-primary underline-offset-2 transition ease-smooth hover:underline"
                 >
                   Đã ủng hộ? Nhập mã tại đây
                 </button>

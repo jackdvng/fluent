@@ -56,7 +56,7 @@ export default function VocabularyCards({
             key={item.word}
             type="button"
             onClick={() => handleCardClick(item.word)}
-            className="flip-scene w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="flip-scene w-full cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-pressed={isFlipped}
           >
             <div className={`flip-inner ${isFlipped ? "is-flipped" : ""}`}>

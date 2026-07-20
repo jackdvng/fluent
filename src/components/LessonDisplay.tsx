@@ -172,7 +172,7 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
                 <button
                   type="button"
                   onClick={() => setSummaryExpanded((value) => !value)}
-                  className="mt-1 text-sm font-bold text-primary transition ease-smooth hover:text-primary-hover"
+                  className="mt-1 cursor-pointer text-sm font-bold text-primary transition ease-smooth hover:text-primary-hover"
                 >
                   {summaryExpanded ? "Thu gọn" : "Xem thêm"}
                 </button>
@@ -217,7 +217,7 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
               key={tab.id}
               type="button"
               onClick={() => selectTab(tab.id)}
-              className={`flex shrink-0 items-center rounded-full border-2 px-3 py-2.5 text-xs font-extrabold transition ease-smooth sm:px-3.5 sm:py-3 sm:text-sm ${
+              className={`flex shrink-0 cursor-pointer items-center rounded-full border-2 px-3 py-2.5 text-xs font-extrabold transition ease-smooth sm:px-3.5 sm:py-3 sm:text-sm ${
                 isActive
                   ? "scale-[1.03] border-primary bg-primary text-white shadow-[0_4px_0_#CA2851,0_8px_18px_rgba(202,40,81,0.3)]"
                   : "border-border bg-tab-inactive text-body hover:border-primary hover:text-primary"
