@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import LessonDisplay from "@/components/LessonDisplay";
+import { isMaintenanceMode } from "@/lib/maintenance";
 import { SAMPLE_LESSON } from "@/lib/sampleLesson";
 import { DAILY_LIMIT, useDailyLimit } from "@/lib/useDailyLimit";
 import { useLicense } from "@/lib/useLicense";
@@ -34,7 +35,9 @@ export default function LessonGenerator() {
     activate,
   } = useLicense();
 
+  const maintenance = isMaintenanceMode();
   const blockedByLimit = !devMode && !isPro && limitReached;
+  const inputDisabled = maintenance || blockedByLimit;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -46,6 +49,10 @@ export default function LessonGenerator() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (maintenance) {
+      return;
+    }
 
     // Dev mode: skip the Claude API and load dummy data (no credits used).
     if (devMode) {
@@ -172,20 +179,28 @@ export default function LessonGenerator() {
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="Dán link YouTube vào đây..."
-            disabled={blockedByLimit}
+            disabled={inputDisabled}
             className="min-w-0 flex-1 rounded-2xl border-2 border-border bg-background px-4 py-4 text-base font-semibold text-heading outline-none placeholder:text-muted transition ease-smooth focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="submit"
-            disabled={loading || (!devMode && !url.trim()) || blockedByLimit}
+            disabled={
+              loading || maintenance || (!devMode && !url.trim()) || blockedByLimit
+            }
             className="cursor-pointer rounded-2xl bg-primary px-10 py-5 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
           >
-            {loading ? "Đang tạo bài học..." : "Bắt đầu"}
+            {maintenance
+              ? "Tạm dừng"
+              : loading
+                ? "Đang tạo bài học..."
+                : "Bắt đầu"}
           </button>
         </div>
 
         <p className="mt-4 text-center text-sm text-body sm:text-left">
-          Hoạt động tốt nhất với video có phụ đề tiếng Anh.
+          {maintenance
+            ? "Tính năng tạo bài học đang tạm dừng để nâng cấp. Quay lại sau ít phút nhé!"
+            : "Hoạt động tốt nhất với video có phụ đề tiếng Anh."}
         </p>
 
         {hydrated && licenseHydrated ? (
