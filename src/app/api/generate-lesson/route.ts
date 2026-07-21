@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { generateLesson } from "@/lib/anthropic";
+import { isMaintenanceMode } from "@/lib/maintenance";
 import {
   extractVideoId,
   getTranscriptText,
@@ -9,6 +10,17 @@ import {
 
 export async function POST(request: Request) {
   try {
+    if (isMaintenanceMode()) {
+      console.log("[generate-lesson] Blocked — maintenance mode is on");
+      return NextResponse.json(
+        {
+          error:
+            "Fluent đang được nâng cấp. Vui lòng quay lại sau ít phút nhé! 🛠️",
+        },
+        { status: 503 },
+      );
+    }
+
     const body = (await request.json()) as { url?: string };
     const url = body.url?.trim();
 

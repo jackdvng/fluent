@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 
+import SpeakButton from "@/components/SpeakButton";
 import type { VocabularyItem } from "@/types/lesson";
 
 const STAGGER_MS = 150;
@@ -52,10 +53,17 @@ export default function VocabularyCards({
         const isFlipped = flippedWord === item.word;
 
         return (
-          <button
+          <div
             key={item.word}
-            type="button"
+            role="button"
+            tabIndex={0}
             onClick={() => handleCardClick(item.word)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleCardClick(item.word);
+              }
+            }}
             className="flip-scene w-full cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-pressed={isFlipped}
           >
@@ -64,16 +72,22 @@ export default function VocabularyCards({
                 <span className="shrink-0 text-xs font-bold uppercase tracking-wider text-primary">
                   Chạm để xem
                 </span>
-                <p className="mt-2 line-clamp-3 w-full break-words text-center text-xl font-bold leading-snug text-heading sm:text-2xl">
-                  {item.word}
-                </p>
+                <div className="mt-2 flex w-full items-center justify-center gap-2">
+                  <p className="line-clamp-3 break-words text-center text-xl font-bold leading-snug text-heading sm:text-2xl">
+                    {item.word}
+                  </p>
+                  <SpeakButton text={item.word} />
+                </div>
               </div>
 
               <div className="flip-face flip-back flex flex-col rounded-2xl border-2 border-border bg-highlight p-6 shadow-sm">
                 <div className="scrollbar-hidden flex min-h-0 flex-1 flex-col overflow-y-auto">
-                  <p className="shrink-0 break-words text-base font-bold leading-snug text-heading">
-                    {item.word}
-                  </p>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <p className="break-words text-base font-bold leading-snug text-heading">
+                      {item.word}
+                    </p>
+                    <SpeakButton text={item.word} />
+                  </div>
                   <p className="mt-2 shrink-0 break-words text-sm leading-5 text-body">
                     {item.definition}
                   </p>
@@ -88,7 +102,7 @@ export default function VocabularyCards({
                 </div>
               </div>
             </div>
-          </button>
+          </div>
         );
       })}
     </div>

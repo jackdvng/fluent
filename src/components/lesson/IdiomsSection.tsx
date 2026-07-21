@@ -1,5 +1,6 @@
 "use client";
 
+import SpeakButton from "@/components/SpeakButton";
 import type { IdiomItem } from "@/types/lesson";
 
 interface IdiomsSectionProps {
@@ -28,7 +29,10 @@ export default function IdiomsSection({ items }: IdiomsSectionProps) {
           key={item.phrase}
           className="rounded-2xl border-2 border-border bg-card p-6 shadow-sm"
         >
-          <p className="text-xl font-bold text-heading">{item.phrase}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xl font-bold text-heading">{item.phrase}</p>
+            <SpeakButton text={item.phrase} size={18} />
+          </div>
           <p className="mt-3 text-base leading-7 text-body">{item.meaning}</p>
           <p className="mt-2 text-sm font-bold text-translation">
             {item.vietnamese}
