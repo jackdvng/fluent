@@ -134,3 +134,28 @@ body {
 .ease-smooth {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/*
+ * Duolingo-style pressable 3D button.
+ * A solid (0-blur) offset sits directly beneath the button as a chunky base in
+ * a darker shade of the button's own color. On :active the button translates
+ * down by the offset and the base collapses, so it reads as being pressed into
+ * the surface. Applied only to the main CTA buttons (generate, donate).
+ */
+.btn-3d {
+  --btn-3d-base: var(--primary-hover); /* darker shade of the coral face */
+  box-shadow: 0 4px 0 0 var(--btn-3d-base);
+  transition:
+    transform 70ms ease-out,
+    box-shadow 70ms ease-out,
+    background-color 120ms ease-out;
+}
+
+.btn-3d:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 var(--btn-3d-base);
+}
+
+.btn-3d:disabled {
+  box-shadow: none;
+}

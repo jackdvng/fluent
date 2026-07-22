@@ -2,7 +2,38 @@ import Anthropic from "@anthropic-ai/sdk";
 
 import type { Lesson } from "@/types/lesson";
 
-const SYSTEM_PROMPT = `You are an expert English teacher creating lessons for Vietnamese speakers.
+// Depth fields (meanings, collocations, wordFamily) are Pro-only. They are kept
+// in a single block here so the free-tier prompt can omit them cleanly, and so
+// the paid feature can be toggled server-side via `includeDepth`.
+const VOCAB_DEPTH_SCHEMA = `,
+      "meanings": [
+        {
+          "definition": "English definition for this specific sense of the word",
+          "example": "English example sentence using the word in this sense",
+          "vietnamese": "Vietnamese translation of the example sentence"
+        }
+      ],
+      "collocations": ["common English collocation or phrase using the word", "another collocation"],
+      "wordFamily": [
+        { "word": "related English word form", "partOfSpeech": "English part of speech" }
+      ]`;
+
+const VOCAB_DEPTH_LANGUAGE_RULE =
+  "\n- meanings.definition, meanings.example, collocations, and wordFamily.word/partOfSpeech MUST be in English (the content being taught); meanings.vietnamese MUST be in Vietnamese";
+
+const VOCAB_DEPTH_REQUIREMENTS = `
+
+Vocabulary DEPTH fields (meanings, collocations, wordFamily) — ALWAYS include them for this (Pro) lesson:
+- meanings: include one entry per common meaning of the word. If the word has multiple common meanings, include multiple entries; otherwise include exactly one. Each meaning needs an English definition, an English example sentence, and a Vietnamese translation of that example.
+- collocations: 2-4 common English collocations or set phrases that use the word (English only)
+- wordFamily: related English word forms with their part of speech (e.g. "develop" -> "development" (noun), "developer" (noun), "developing" (adjective)). Use [] only if there are no natural related forms.`;
+
+function buildSystemPrompt(includeDepth: boolean): string {
+  const vocabDepthSchema = includeDepth ? VOCAB_DEPTH_SCHEMA : "";
+  const depthLanguageRule = includeDepth ? VOCAB_DEPTH_LANGUAGE_RULE : "";
+  const depthRequirements = includeDepth ? VOCAB_DEPTH_REQUIREMENTS : "";
+
+  return `You are an expert English teacher creating lessons for Vietnamese speakers.
 
 Given a YouTube video transcript, produce a structured English lesson as valid JSON only — no markdown, no code fences, no extra text.
 
@@ -16,20 +47,7 @@ The JSON must match this schema exactly:
       "partOfSpeech": "English part of speech, e.g. noun, verb, adjective, phrasal verb",
       "definitionEn": "a clear, concise English definition of the word",
       "definitionVi": "clear explanation in Vietnamese of what the English word/phrase means",
-      "vietnamese": "Vietnamese translation or equivalent",
-      // --- DEPTH FIELDS (grouped so a future free-tier prompt variant can omit them) ---
-      "meanings": [
-        {
-          "definition": "English definition for this specific sense of the word",
-          "example": "English example sentence using the word in this sense",
-          "vietnamese": "Vietnamese translation of the example sentence"
-        }
-      ],
-      "collocations": ["common English collocation or phrase using the word", "another collocation"],
-      "wordFamily": [
-        { "word": "related English word form", "partOfSpeech": "English part of speech" }
-      ]
-      // --- END DEPTH FIELDS ---
+      "vietnamese": "Vietnamese translation or equivalent"${vocabDepthSchema}
     }
   ],
   "idiomsAndSlang": [
@@ -59,9 +77,9 @@ The JSON must match this schema exactly:
 
 Language rules:
 - title and summary MUST be entirely in Vietnamese
-- vocabulary.word, partOfSpeech, definitionEn, meanings.definition, meanings.example, collocations, and wordFamily MUST be in English (the content being taught)
+- vocabulary.word, partOfSpeech, and definitionEn MUST be in English (the content being taught)
 - idiomsAndSlang.phrase and exampleSentences.sentence MUST be in English (the content being taught)
-- definitionVi, vietnamese, meanings.vietnamese, idiom meanings, notes, quiz questions, and explanations MUST be in Vietnamese
+- definitionVi, vietnamese, idiom meanings, notes, quiz questions, and explanations MUST be in Vietnamese${depthLanguageRule}
 
 Requirements:
 - Include 8-12 vocabulary items drawn from the transcript
@@ -70,12 +88,7 @@ Requirements:
 - Include exactly 3 example sentences using key phrases from the lesson
 - Include exactly 5 quiz questions with 4 options each
 - correctAnswer must be the 0-based index of the correct option
-- Use simple, learner-friendly Vietnamese for all Vietnamese text
-
-Vocabulary DEPTH fields (meanings, collocations, wordFamily) — these are grouped together so they can be omitted in a future free-tier variant; for now ALWAYS include them:
-- meanings: include one entry per common meaning of the word. If the word has multiple common meanings, include multiple entries; otherwise include exactly one. Each meaning needs an English definition, an English example sentence, and a Vietnamese translation of that example.
-- collocations: 2-4 common English collocations or set phrases that use the word (English only)
-- wordFamily: related English word forms with their part of speech (e.g. "develop" -> "development" (noun), "developer" (noun), "developing" (adjective)). Use [] only if there are no natural related forms.
+- Use simple, learner-friendly Vietnamese for all Vietnamese text${depthRequirements}
 
 CRITICAL — Quiz rules:
 - NEVER ask about the video's story, plot, events, people, places, times, or factual details (e.g. "mấy giờ họ thức dậy?", "họ đi đâu?", "chuyện gì xảy ra tiếp theo?")
@@ -84,6 +97,7 @@ CRITICAL — Quiz rules:
 - Quiz question text must be in Vietnamese; quiz answer options must ALL be in Vietnamese (they are translations/explanations of the English word being tested)
 - Good example: "Từ 'break the ice' có nghĩa là gì?" with English idiom options
 - Bad example: "Trong video, họ đi đâu sau bữa sáng?"`;
+}
 
 function stripJsonFences(text: string): string {
   const trimmed = text.trim();
@@ -109,7 +123,19 @@ function parseLesson(raw: string): Lesson {
   return parsed;
 }
 
-export async function generateLesson(transcript: string): Promise<Lesson> {
+interface GenerateLessonOptions {
+  /**
+   * When true, generate the richer Pro-tier vocabulary (meanings,
+   * collocations, word family). Free tier omits these depth fields.
+   */
+  includeDepth?: boolean;
+}
+
+export async function generateLesson(
+  transcript: string,
+  options: GenerateLessonOptions = {},
+): Promise<Lesson> {
+  const includeDepth = options.includeDepth ?? false;
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
@@ -123,10 +149,10 @@ export async function generateLesson(transcript: string): Promise<Lesson> {
 
   const message = await client.messages.create({
     model,
-    // Larger output budget for the richer vocabulary schema (meanings,
-    // collocations, word family).
-    max_tokens: 8192,
-    system: SYSTEM_PROMPT,
+    // Larger output budget for the richer Pro vocabulary schema (meanings,
+    // collocations, word family); the free tier needs less.
+    max_tokens: includeDepth ? 8192 : 4096,
+    system: buildSystemPrompt(includeDepth),
     messages: [
       {
         role: "user",

@@ -43,6 +43,7 @@ export default function LessonGenerator() {
 
   const { remaining, limitReached, hydrated, increment } = useDailyLimit();
   const {
+    licenseKey,
     isPro,
     hydrated: licenseHydrated,
     activate,
@@ -126,7 +127,8 @@ export default function LessonGenerator() {
       const response = await fetch("/api/generate-lesson", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        // Send the license key so the server can unlock Pro vocabulary depth.
+        body: JSON.stringify({ url, licenseKey: licenseKey ?? undefined }),
       });
 
       const data = (await response.json()) as GenerateLessonResponse & {
@@ -249,7 +251,7 @@ export default function LessonGenerator() {
             disabled={
               loading || maintenance || (!devMode && !url.trim()) || blockedByLimit
             }
-            className="cursor-pointer rounded-2xl bg-primary px-10 py-5 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
+            className="btn-3d cursor-pointer rounded-2xl bg-primary px-10 py-5 text-base font-extrabold uppercase tracking-wide text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {maintenance
               ? "Tạm dừng"
@@ -357,7 +359,7 @@ export default function LessonGenerator() {
             href={CHECKOUT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_#CA2851] transition ease-smooth hover:bg-primary-hover active:translate-y-0.5 active:shadow-[0_2px_0_#CA2851]"
+            className="btn-3d mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-extrabold uppercase tracking-wide text-white hover:bg-primary-hover"
           >
             Ủng hộ Fluent — $3 ☕
           </a>

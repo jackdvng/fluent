@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { generateLesson } from "@/lib/anthropic";
+import { isProLicense } from "@/lib/license";
 import { isMaintenanceMode } from "@/lib/maintenance";
 import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import {
@@ -22,7 +23,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = (await request.json()) as { url?: string };
+    const body = (await request.json()) as {
+      url?: string;
+      licenseKey?: string;
+    };
     const url = body.url?.trim();
 
     console.log("[generate-lesson] Request received, URL:", url ?? "(empty)");
@@ -65,8 +69,15 @@ export async function POST(request: Request) {
     const rawTranscript = await getTranscriptText(videoId);
     const transcript = truncateTranscript(rawTranscript);
 
-    console.log("[generate-lesson] Generating lesson with Claude...");
-    const lesson = await generateLesson(transcript);
+    // Validate the license server-side so Pro-only vocabulary depth can't be
+    // spoofed by the client. Free (no/invalid key) gets the lighter prompt.
+    const includeDepth = await isProLicense(body.licenseKey);
+    console.log(
+      `[generate-lesson] Generating lesson with Claude (tier: ${
+        includeDepth ? "pro" : "free"
+      })...`,
+    );
+    const lesson = await generateLesson(transcript, { includeDepth });
     console.log("[generate-lesson] Lesson generated successfully");
 
     return NextResponse.json({ lesson, videoId });
