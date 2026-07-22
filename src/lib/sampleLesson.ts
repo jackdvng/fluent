@@ -11,45 +11,141 @@ export const SAMPLE_LESSON: GenerateLessonResponse = {
     vocabulary: [
       {
         word: "reliable",
-        definition: "Able to be trusted to do something well.",
+        partOfSpeech: "adjective",
+        definitionEn: "Able to be trusted to do something well.",
+        definitionVi: "Có thể tin tưởng để làm tốt một việc gì đó.",
         vietnamese: "đáng tin cậy",
-        context: "She is a reliable friend who always keeps her promises.",
+        meanings: [
+          {
+            definition: "Consistently good in quality or performance; trustworthy.",
+            example: "She is a reliable friend who always keeps her promises.",
+            vietnamese: "Cô ấy là một người bạn đáng tin cậy, luôn giữ lời hứa.",
+          },
+          {
+            definition: "Likely to be accurate or correct (of information).",
+            example: "We need a reliable source for this data.",
+            vietnamese: "Chúng ta cần một nguồn đáng tin cậy cho dữ liệu này.",
+          },
+        ],
+        collocations: ["a reliable source", "highly reliable", "a reliable friend"],
+        wordFamily: [
+          { word: "rely", partOfSpeech: "verb" },
+          { word: "reliability", partOfSpeech: "noun" },
+          { word: "reliably", partOfSpeech: "adverb" },
+        ],
       },
       {
         word: "overwhelmed",
-        definition: "Feeling that you have too much to deal with.",
+        partOfSpeech: "adjective",
+        definitionEn: "Feeling that you have too much to deal with.",
+        definitionVi: "Cảm giác có quá nhiều thứ phải xử lý.",
         vietnamese: "choáng ngợp, quá tải",
-        context: "I felt overwhelmed by all the new information.",
+        meanings: [
+          {
+            definition: "Overcome by a strong emotion or too many tasks.",
+            example: "I felt overwhelmed by all the new information.",
+            vietnamese: "Tôi cảm thấy choáng ngợp bởi tất cả thông tin mới.",
+          },
+        ],
+        collocations: ["feel overwhelmed", "completely overwhelmed"],
+        wordFamily: [
+          { word: "overwhelm", partOfSpeech: "verb" },
+          { word: "overwhelming", partOfSpeech: "adjective" },
+        ],
       },
       {
         word: "approach",
-        definition: "A way of dealing with a situation or problem.",
+        partOfSpeech: "noun",
+        definitionEn: "A way of dealing with a situation or problem.",
+        definitionVi: "Một cách để xử lý một tình huống hoặc vấn đề.",
         vietnamese: "cách tiếp cận, phương pháp",
-        context: "We need a different approach to solve this.",
+        meanings: [
+          {
+            definition: "A particular way of dealing with something.",
+            example: "We need a different approach to solve this.",
+            vietnamese: "Chúng ta cần một cách tiếp cận khác để giải quyết việc này.",
+          },
+          {
+            definition: "To come near or nearer to something (verb).",
+            example: "As we approached the station, it started to rain.",
+            vietnamese: "Khi chúng tôi đến gần nhà ga, trời bắt đầu mưa.",
+          },
+        ],
+        collocations: ["a new approach", "take an approach", "approach a problem"],
+        wordFamily: [{ word: "approachable", partOfSpeech: "adjective" }],
       },
       {
         word: "genuine",
-        definition: "Real and exactly what it appears to be; sincere.",
+        partOfSpeech: "adjective",
+        definitionEn: "Real and exactly what it appears to be; sincere.",
+        definitionVi: "Thật và đúng như vẻ ngoài; chân thành.",
         vietnamese: "chân thật, thật lòng",
-        context: "He showed genuine interest in the project.",
+        meanings: [
+          {
+            definition: "Sincere and honest.",
+            example: "He showed genuine interest in the project.",
+            vietnamese: "Anh ấy thể hiện sự quan tâm chân thật với dự án.",
+          },
+        ],
+        collocations: ["genuine interest", "a genuine smile"],
+        wordFamily: [{ word: "genuinely", partOfSpeech: "adverb" }],
       },
       {
         word: "efficient",
-        definition: "Working in a well-organized way without wasting time.",
+        partOfSpeech: "adjective",
+        definitionEn: "Working in a well-organized way without wasting time.",
+        definitionVi: "Làm việc một cách có tổ chức, không lãng phí thời gian.",
         vietnamese: "hiệu quả",
-        context: "This is a more efficient way to get things done.",
+        meanings: [
+          {
+            definition: "Achieving maximum productivity with minimum wasted effort.",
+            example: "This is a more efficient way to get things done.",
+            vietnamese: "Đây là cách hiệu quả hơn để hoàn thành công việc.",
+          },
+        ],
+        collocations: ["highly efficient", "an efficient system"],
+        wordFamily: [
+          { word: "efficiency", partOfSpeech: "noun" },
+          { word: "efficiently", partOfSpeech: "adverb" },
+        ],
       },
       {
         word: "curious",
-        definition: "Eager to know or learn something.",
+        partOfSpeech: "adjective",
+        definitionEn: "Eager to know or learn something.",
+        definitionVi: "Háo hức muốn biết hoặc học hỏi điều gì đó.",
         vietnamese: "tò mò, ham học hỏi",
-        context: "She was curious about how the machine worked.",
+        meanings: [
+          {
+            definition: "Interested in learning about things.",
+            example: "She was curious about how the machine worked.",
+            vietnamese: "Cô ấy tò mò về cách chiếc máy hoạt động.",
+          },
+        ],
+        collocations: ["curious about", "a curious mind"],
+        wordFamily: [
+          { word: "curiosity", partOfSpeech: "noun" },
+          { word: "curiously", partOfSpeech: "adverb" },
+        ],
       },
       {
         word: "encourage",
-        definition: "To give someone support or confidence to do something.",
+        partOfSpeech: "verb",
+        definitionEn: "To give someone support or confidence to do something.",
+        definitionVi: "Trao cho ai đó sự ủng hộ hoặc tự tin để làm điều gì đó.",
         vietnamese: "khuyến khích, động viên",
-        context: "My teacher encouraged me to try again.",
+        meanings: [
+          {
+            definition: "To give support, courage, or hope to someone.",
+            example: "My teacher encouraged me to try again.",
+            vietnamese: "Giáo viên của tôi đã động viên tôi thử lại.",
+          },
+        ],
+        collocations: ["encourage someone to", "strongly encourage"],
+        wordFamily: [
+          { word: "encouragement", partOfSpeech: "noun" },
+          { word: "encouraging", partOfSpeech: "adjective" },
+        ],
       },
     ],
     idiomsAndSlang: [

@@ -17,11 +17,30 @@ import type { GenerateLessonResponse } from "@/types/lesson";
 const INDEX_KEY = "fluent-saved-lessons";
 const lessonKey = (videoId: string) => `fluent-lesson-${videoId}`;
 
+/**
+ * Bump this whenever the lesson schema changes. Saved lessons (and index
+ * entries) tagged with a different version are treated as stale: they are
+ * discarded and cleaned up on read rather than rendered against the new UI.
+ *
+ * NOTE: this is also intended to support a future paid tier — e.g. lessons
+ * generated with/without the vocabulary "depth" fields could be distinguished
+ * or migrated via this version. No paywall/gating logic exists yet.
+ */
+export const SAVED_LESSON_SCHEMA_VERSION = 2;
+
 export interface SavedLessonMeta {
   videoId: string;
   title: string;
   vocabCount: number;
   savedAt: number; // epoch ms
+  version: number; // schema version this entry was saved under
+}
+
+/** Envelope actually persisted per lesson key (adds the schema version). */
+interface StoredLesson {
+  version: number;
+  savedAt: number;
+  response: GenerateLessonResponse;
 }
 
 function isBrowser(): boolean {
@@ -50,7 +69,7 @@ export function getSavedIndex(): SavedLessonMeta[] {
     }
 
     // Keep only well-formed entries so one bad record can't break the list.
-    return parsed.filter(
+    const wellFormed = parsed.filter(
       (entry): entry is SavedLessonMeta =>
         !!entry &&
         typeof entry === "object" &&
@@ -59,6 +78,42 @@ export function getSavedIndex(): SavedLessonMeta[] {
         typeof (entry as SavedLessonMeta).vocabCount === "number" &&
         typeof (entry as SavedLessonMeta).savedAt === "number",
     );
+
+    // Discard entries saved under a different schema version.
+    const current = wellFormed.filter(
+      (entry) => entry.version === SAVED_LESSON_SCHEMA_VERSION,
+    );
+
+    // If anything was dropped (stale version or malformed), clean up storage:
+    // remove orphaned lesson keys and rewrite the index.
+    if (current.length !== parsed.length) {
+      const keepIds = new Set(current.map((entry) => entry.videoId));
+      const staleIds = parsed
+        .filter(
+          (entry): entry is { videoId: string } =>
+            !!entry &&
+            typeof entry === "object" &&
+            typeof (entry as { videoId?: unknown }).videoId === "string",
+        )
+        .map((entry) => entry.videoId)
+        .filter((videoId) => !keepIds.has(videoId));
+
+      for (const videoId of staleIds) {
+        try {
+          window.localStorage.removeItem(lessonKey(videoId));
+        } catch {
+          // Ignore removal failures.
+        }
+      }
+
+      try {
+        writeIndex(current);
+      } catch {
+        // Ignore write failures; we still return the valid subset.
+      }
+    }
+
+    return current;
   } catch {
     return [];
   }
@@ -82,12 +137,25 @@ export function getSavedLesson(videoId: string): GenerateLessonResponse | null {
       return null;
     }
 
-    const parsed = JSON.parse(raw) as GenerateLessonResponse;
-    if (!parsed || typeof parsed !== "object" || !parsed.lesson) {
+    const parsed = JSON.parse(raw) as Partial<StoredLesson>;
+
+    // Discard anything not saved under the current schema version (this also
+    // rejects the old un-versioned shape) and clean it up.
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      parsed.version !== SAVED_LESSON_SCHEMA_VERSION ||
+      !parsed.response?.lesson
+    ) {
+      try {
+        window.localStorage.removeItem(lessonKey(videoId));
+      } catch {
+        // Ignore removal failures.
+      }
       return null;
     }
 
-    return parsed;
+    return parsed.response;
   } catch {
     return null;
   }
@@ -159,12 +227,20 @@ export function saveLesson(response: GenerateLessonResponse): SavedLessonMeta[] 
   }
 
   const { videoId, lesson } = response;
+  const savedAt = Date.now();
 
   const meta: SavedLessonMeta = {
     videoId,
     title: lesson.title,
     vocabCount: Array.isArray(lesson.vocabulary) ? lesson.vocabulary.length : 0,
-    savedAt: Date.now(),
+    savedAt,
+    version: SAVED_LESSON_SCHEMA_VERSION,
+  };
+
+  const stored: StoredLesson = {
+    version: SAVED_LESSON_SCHEMA_VERSION,
+    savedAt,
+    response,
   };
 
   // Upsert into index: remove any existing entry, then put newest first.
@@ -174,7 +250,7 @@ export function saveLesson(response: GenerateLessonResponse): SavedLessonMeta[] 
   // Write the full lesson first (with quota eviction), then the index.
   const lessonWrite = trySetWithEviction(
     lessonKey(videoId),
-    JSON.stringify(response),
+    JSON.stringify(stored),
     index,
   );
 

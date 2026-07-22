@@ -13,9 +13,23 @@ The JSON must match this schema exactly:
   "vocabulary": [
     {
       "word": "English word or phrase from the transcript",
-      "definition": "clear explanation in Vietnamese of what the English word/phrase means",
+      "partOfSpeech": "English part of speech, e.g. noun, verb, adjective, phrasal verb",
+      "definitionEn": "a clear, concise English definition of the word",
+      "definitionVi": "clear explanation in Vietnamese of what the English word/phrase means",
       "vietnamese": "Vietnamese translation or equivalent",
-      "context": "optional short English example quote from the transcript showing the word in use"
+      // --- DEPTH FIELDS (grouped so a future free-tier prompt variant can omit them) ---
+      "meanings": [
+        {
+          "definition": "English definition for this specific sense of the word",
+          "example": "English example sentence using the word in this sense",
+          "vietnamese": "Vietnamese translation of the example sentence"
+        }
+      ],
+      "collocations": ["common English collocation or phrase using the word", "another collocation"],
+      "wordFamily": [
+        { "word": "related English word form", "partOfSpeech": "English part of speech" }
+      ]
+      // --- END DEPTH FIELDS ---
     }
   ],
   "idiomsAndSlang": [
@@ -45,17 +59,23 @@ The JSON must match this schema exactly:
 
 Language rules:
 - title and summary MUST be entirely in Vietnamese
-- vocabulary.word, idiomsAndSlang.phrase, and exampleSentences.sentence MUST be in English (the content being taught)
-- definitions, meanings, notes, quiz questions, and explanations MUST be in Vietnamese
-- context field may be a short English quote from the transcript
+- vocabulary.word, partOfSpeech, definitionEn, meanings.definition, meanings.example, collocations, and wordFamily MUST be in English (the content being taught)
+- idiomsAndSlang.phrase and exampleSentences.sentence MUST be in English (the content being taught)
+- definitionVi, vietnamese, meanings.vietnamese, idiom meanings, notes, quiz questions, and explanations MUST be in Vietnamese
 
 Requirements:
 - Include 8-12 vocabulary items drawn from the transcript
+- For each vocabulary item, partOfSpeech, definitionEn, definitionVi, and vietnamese are ALWAYS required
 - Include 3-6 idioms or slang expressions (use [] if none appear)
 - Include exactly 3 example sentences using key phrases from the lesson
 - Include exactly 5 quiz questions with 4 options each
 - correctAnswer must be the 0-based index of the correct option
 - Use simple, learner-friendly Vietnamese for all Vietnamese text
+
+Vocabulary DEPTH fields (meanings, collocations, wordFamily) — these are grouped together so they can be omitted in a future free-tier variant; for now ALWAYS include them:
+- meanings: include one entry per common meaning of the word. If the word has multiple common meanings, include multiple entries; otherwise include exactly one. Each meaning needs an English definition, an English example sentence, and a Vietnamese translation of that example.
+- collocations: 2-4 common English collocations or set phrases that use the word (English only)
+- wordFamily: related English word forms with their part of speech (e.g. "develop" -> "development" (noun), "developer" (noun), "developing" (adjective)). Use [] only if there are no natural related forms.
 
 CRITICAL — Quiz rules:
 - NEVER ask about the video's story, plot, events, people, places, times, or factual details (e.g. "mấy giờ họ thức dậy?", "họ đi đâu?", "chuyện gì xảy ra tiếp theo?")
@@ -103,7 +123,9 @@ export async function generateLesson(transcript: string): Promise<Lesson> {
 
   const message = await client.messages.create({
     model,
-    max_tokens: 4096,
+    // Larger output budget for the richer vocabulary schema (meanings,
+    // collocations, word family).
+    max_tokens: 8192,
     system: SYSTEM_PROMPT,
     messages: [
       {
@@ -112,6 +134,8 @@ export async function generateLesson(transcript: string): Promise<Lesson> {
       },
     ],
   });
+
+  console.log("[USAGE]", JSON.stringify(message.usage));
 
   const textBlock = message.content.find((block) => block.type === "text");
 
