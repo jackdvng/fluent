@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { generateLesson } from "@/lib/anthropic";
 import { isMaintenanceMode } from "@/lib/maintenance";
+import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
 import {
   extractVideoId,
   getTranscriptText,
@@ -44,6 +45,22 @@ export async function POST(request: Request) {
     }
 
     console.log("[generate-lesson] Video ID:", videoId);
+
+    // Rate limit by IP BEFORE any Supadata/Anthropic work so we block the
+    // expensive calls, not just the response.
+    const ip = getClientIp(request);
+    const rateLimit = await checkRateLimit(ip);
+
+    if (!rateLimit.success) {
+      console.log("[generate-lesson] Rate limit exceeded for IP:", ip);
+      return NextResponse.json(
+        {
+          error:
+            "Bạn đã tạo quá nhiều bài học trong một giờ qua (tối đa 5 bài/giờ). Vui lòng thử lại sau ít phút nhé! ⏳",
+        },
+        { status: 429 },
+      );
+    }
 
     const rawTranscript = await getTranscriptText(videoId);
     const transcript = truncateTranscript(rawTranscript);

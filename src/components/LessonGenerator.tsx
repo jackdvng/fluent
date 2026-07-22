@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import LessonDisplay from "@/components/LessonDisplay";
+import SavedLessons from "@/components/SavedLessons";
 import { isMaintenanceMode } from "@/lib/maintenance";
 import { SAMPLE_LESSON } from "@/lib/sampleLesson";
+import {
+  deleteSavedLesson,
+  getSavedIndex,
+  getSavedLesson,
+  saveLesson,
+  type SavedLessonMeta,
+} from "@/lib/savedLessons";
 import { DAILY_LIMIT, useDailyLimit } from "@/lib/useDailyLimit";
 import { useLicense } from "@/lib/useLicense";
+import { extractVideoId } from "@/lib/videoId";
 import type { GenerateLessonResponse } from "@/types/lesson";
 
 // Replace with your Lemon Squeezy checkout URL (or set the env var).
@@ -28,6 +37,10 @@ export default function LessonGenerator() {
   const [licenseStatus, setLicenseStatus] = useState<LicenseStatus>("idle");
   const [licenseError, setLicenseError] = useState<string | null>(null);
 
+  const [savedIndex, setSavedIndex] = useState<SavedLessonMeta[]>([]);
+  const [scrollToResult, setScrollToResult] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
+
   const { remaining, limitReached, hydrated, increment } = useDailyLimit();
   const {
     isPro,
@@ -45,7 +58,35 @@ export default function LessonGenerator() {
       setDevMode(true);
       setResult(SAMPLE_LESSON);
     }
+
+    // Load the saved-lessons index (localStorage is browser-only).
+    setSavedIndex(getSavedIndex());
   }, []);
+
+  // Smooth-scroll to the lesson once it has rendered after a saved selection.
+  useEffect(() => {
+    if (scrollToResult && result && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      setScrollToResult(false);
+    }
+  }, [scrollToResult, result]);
+
+  function handleSelectSaved(videoId: string) {
+    const saved = getSavedLesson(videoId);
+    if (!saved) {
+      // Entry is missing/corrupt — drop it from the index.
+      setSavedIndex(deleteSavedLesson(videoId));
+      return;
+    }
+    setError(null);
+    setLoading(false);
+    setResult(saved);
+    setScrollToResult(true);
+  }
+
+  function handleDeleteSaved(videoId: string) {
+    setSavedIndex(deleteSavedLesson(videoId));
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,6 +100,18 @@ export default function LessonGenerator() {
       setError(null);
       setResult(SAMPLE_LESSON);
       return;
+    }
+
+    // If we already have this lesson saved, load it from storage instead of
+    // re-paying Supadata + Claude for a repeat video.
+    const videoId = extractVideoId(url);
+    if (videoId) {
+      const cached = getSavedLesson(videoId);
+      if (cached) {
+        setError(null);
+        setResult(cached);
+        return;
+      }
     }
 
     if (blockedByLimit) {
@@ -80,11 +133,20 @@ export default function LessonGenerator() {
         error?: string;
       };
 
+      if (response.status === 429) {
+        throw new Error(
+          data.error ??
+            "Bạn đã tạo quá nhiều bài học trong một giờ qua. Vui lòng thử lại sau ít phút nhé! ⏳",
+        );
+      }
+
       if (!response.ok) {
         throw new Error(data.error ?? "Không thể tạo bài học.");
       }
 
       setResult(data);
+      // Persist the freshly generated lesson (and refresh the list).
+      setSavedIndex(saveLesson(data));
       if (!isPro) {
         increment();
       }
@@ -278,6 +340,12 @@ export default function LessonGenerator() {
         ) : null}
       </form>
 
+      <SavedLessons
+        items={savedIndex}
+        onSelect={handleSelectSaved}
+        onDelete={handleDeleteSaved}
+      />
+
       {blockedByLimit ? (
         <div className="rounded-2xl border-2 border-border bg-highlight px-6 py-6 text-center">
           <p className="text-base font-bold leading-7 text-heading">
@@ -318,7 +386,10 @@ export default function LessonGenerator() {
       ) : null}
 
       {result ? (
-        <div className="rounded-3xl border-2 border-border bg-card p-6 shadow-sm sm:p-8">
+        <div
+          ref={resultRef}
+          className="scroll-mt-4 rounded-3xl border-2 border-border bg-card p-6 shadow-sm sm:p-8"
+        >
           <LessonDisplay lesson={result.lesson} videoId={result.videoId} />
         </div>
       ) : null}

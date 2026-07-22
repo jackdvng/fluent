@@ -1,27 +1,15 @@
 import { fetchTranscriptText } from "@/lib/transcript";
-
-const VIDEO_ID_PATTERNS = [
-  /(?:youtube\.com\/watch\?v=|youtube\.com\/watch\?.+&v=)([a-zA-Z0-9_-]{11})/,
-  /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-  /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-  /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-  /^([a-zA-Z0-9_-]{11})$/,
-];
+import { extractVideoId as extractVideoIdPure } from "@/lib/videoId";
 
 export function extractVideoId(url: string): string | null {
-  const trimmed = url.trim();
-  console.log("[youtube] Extracting video ID from URL:", trimmed);
-
-  for (const pattern of VIDEO_ID_PATTERNS) {
-    const match = trimmed.match(pattern);
-    if (match?.[1]) {
-      console.log("[youtube] Extracted video ID:", match[1]);
-      return match[1];
-    }
-  }
-
-  console.log("[youtube] Could not extract video ID from URL");
-  return null;
+  console.log("[youtube] Extracting video ID from URL:", url.trim());
+  const videoId = extractVideoIdPure(url);
+  console.log(
+    videoId
+      ? `[youtube] Extracted video ID: ${videoId}`
+      : "[youtube] Could not extract video ID from URL",
+  );
+  return videoId;
 }
 
 export async function getTranscriptText(videoId: string): Promise<string> {
