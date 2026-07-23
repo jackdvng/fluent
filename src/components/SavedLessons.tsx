@@ -97,8 +97,8 @@ export default function SavedLessons({
               key={item.videoId}
               className={`flex items-center gap-2 rounded-2xl border-2 p-2 transition ease-smooth ${
                 isSelected
-                  ? "border-primary bg-highlight"
-                  : "border-border bg-background hover:border-primary hover:bg-highlight"
+                  ? "border-accent bg-[#FFEAD0]"
+                  : "border-border bg-background hover:border-accent hover:bg-[#FFF3E6]"
               }`}
             >
               <button
