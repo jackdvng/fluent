@@ -13,6 +13,7 @@ import {
   saveLesson,
   type SavedLessonMeta,
 } from "@/lib/savedLessons";
+import { animatedScrollToElement } from "@/lib/smoothScroll";
 import { DAILY_LIMIT, useDailyLimit } from "@/lib/useDailyLimit";
 import { useLicense } from "@/lib/useLicense";
 import { extractVideoId } from "@/lib/videoId";
@@ -65,9 +66,11 @@ export default function LessonGenerator() {
   }, []);
 
   // Smooth-scroll to the lesson once it has rendered after a saved selection.
+  // Uses a slower custom animation (ease-out, ~700ms) that respects
+  // prefers-reduced-motion, so the movement is easy to follow.
   useEffect(() => {
     if (scrollToResult && result && resultRef.current) {
-      resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      animatedScrollToElement(resultRef.current, 16, 700);
       setScrollToResult(false);
     }
   }, [scrollToResult, result]);

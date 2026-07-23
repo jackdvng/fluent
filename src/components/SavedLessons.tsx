@@ -62,9 +62,9 @@ export default function SavedLessons({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-3xl px-6 py-4 text-left transition ease-smooth hover:bg-highlight"
+        className="group flex w-full cursor-pointer items-center justify-between gap-3 rounded-3xl px-6 py-4 text-left"
       >
-        <span className="text-sm font-extrabold uppercase tracking-wide text-body">
+        <span className="text-sm font-extrabold uppercase tracking-wide text-body transition-colors ease-smooth group-hover:text-black">
           Bài học đã lưu ({items.length})
         </span>
         <svg
@@ -73,7 +73,7 @@ export default function SavedLessons({
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          className={`shrink-0 text-primary transition-transform ease-smooth ${
+          className={`shrink-0 text-primary transition ease-smooth group-hover:translate-y-1 group-hover:text-primary-hover ${
             open ? "rotate-180" : ""
           }`}
         >
