@@ -20,9 +20,14 @@ const TABS: { id: LessonTab; label: string; emoji: string }[] = [
 interface LessonDisplayProps {
   lesson: Lesson;
   videoId: string;
+  isPro?: boolean;
 }
 
-export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
+export default function LessonDisplay({
+  lesson,
+  videoId,
+  isPro = false,
+}: LessonDisplayProps) {
   const [activeTab, setActiveTab] = useState<LessonTab>("vocabulary");
   const [reviewedWords, setReviewedWords] = useState<Set<string>>(new Set());
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(
@@ -284,6 +289,7 @@ export default function LessonDisplay({ lesson, videoId }: LessonDisplayProps) {
           <VocabularyCards
             items={lesson.vocabulary}
             onReview={handleReviewWord}
+            isPro={isPro}
           />
         ) : null}
 

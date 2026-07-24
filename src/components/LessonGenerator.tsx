@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import LessonDisplay from "@/components/LessonDisplay";
 import SavedLessons from "@/components/SavedLessons";
+import { CHECKOUT_URL } from "@/lib/checkout";
 import { isMaintenanceMode } from "@/lib/maintenance";
 import { SAMPLE_LESSON } from "@/lib/sampleLesson";
 import {
@@ -18,11 +19,6 @@ import { DAILY_LIMIT, useDailyLimit } from "@/lib/useDailyLimit";
 import { useLicense } from "@/lib/useLicense";
 import { extractVideoId } from "@/lib/videoId";
 import type { GenerateLessonResponse } from "@/types/lesson";
-
-// Replace with your Lemon Squeezy checkout URL (or set the env var).
-const CHECKOUT_URL =
-  process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ??
-  "https://your-store.lemonsqueezy.com/buy/your-product-id";
 
 type LicenseStatus = "idle" | "validating" | "error";
 
@@ -395,7 +391,11 @@ export default function LessonGenerator() {
           ref={resultRef}
           className="scroll-mt-4 rounded-3xl border-2 border-border bg-card p-6 shadow-sm sm:p-8"
         >
-          <LessonDisplay lesson={result.lesson} videoId={result.videoId} />
+          <LessonDisplay
+            lesson={result.lesson}
+            videoId={result.videoId}
+            isPro={isPro}
+          />
         </div>
       ) : null}
     </div>

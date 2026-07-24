@@ -28,10 +28,20 @@ Vocabulary DEPTH fields (meanings, collocations, wordFamily) — ALWAYS include 
 - collocations: 2-4 common English collocations or set phrases that use the word (English only)
 - wordFamily: related English word forms with their part of speech (e.g. "develop" -> "development" (noun), "developer" (noun), "developing" (adjective)). Use [] only if there are no natural related forms.`;
 
+// Free tier: give a single item full depth as a "Pro preview"; all others keep
+// only the base fields.
+const VOCAB_PREVIEW_REQUIREMENTS = `
+
+Vocabulary DEPTH fields (meanings, collocations, wordFamily) — for THIS lesson, include them for EXACTLY ONE vocabulary item as a preview of the Pro version:
+- Choose the SINGLE word that benefits MOST from depth: one that has multiple common meanings, real collocations, and related word forms (a word family).
+- For that ONE item only, fully populate: meanings (one entry per common meaning), collocations (2-4 common phrases), and wordFamily (related forms with part of speech).
+- For ALL OTHER vocabulary items, OMIT meanings, collocations, and wordFamily entirely (either leave those keys out or set them to empty arrays []).
+- Exactly one item — no more, no fewer — may contain populated depth fields.`;
+
 function buildSystemPrompt(includeDepth: boolean): string {
-  const vocabDepthSchema = includeDepth ? VOCAB_DEPTH_SCHEMA : "";
-  const depthLanguageRule = includeDepth ? VOCAB_DEPTH_LANGUAGE_RULE : "";
-  const depthRequirements = includeDepth ? VOCAB_DEPTH_REQUIREMENTS : "";
+  const depthRequirements = includeDepth
+    ? VOCAB_DEPTH_REQUIREMENTS
+    : VOCAB_PREVIEW_REQUIREMENTS;
 
   return `You are an expert English teacher creating lessons for Vietnamese speakers.
 
@@ -47,7 +57,7 @@ The JSON must match this schema exactly:
       "partOfSpeech": "English part of speech, e.g. noun, verb, adjective, phrasal verb",
       "definitionEn": "a clear, concise English definition of the word",
       "definitionVi": "clear explanation in Vietnamese of what the English word/phrase means",
-      "vietnamese": "Vietnamese translation or equivalent"${vocabDepthSchema}
+      "vietnamese": "Vietnamese translation or equivalent"${VOCAB_DEPTH_SCHEMA}
     }
   ],
   "idiomsAndSlang": [
@@ -79,7 +89,7 @@ Language rules:
 - title and summary MUST be entirely in Vietnamese
 - vocabulary.word, partOfSpeech, and definitionEn MUST be in English (the content being taught)
 - idiomsAndSlang.phrase and exampleSentences.sentence MUST be in English (the content being taught)
-- definitionVi, vietnamese, idiom meanings, notes, quiz questions, and explanations MUST be in Vietnamese${depthLanguageRule}
+- definitionVi, vietnamese, idiom meanings, notes, quiz questions, and explanations MUST be in Vietnamese${VOCAB_DEPTH_LANGUAGE_RULE}
 
 Requirements:
 - Include 8-12 vocabulary items drawn from the transcript
@@ -150,8 +160,9 @@ export async function generateLesson(
   const message = await client.messages.create({
     model,
     // Larger output budget for the richer Pro vocabulary schema (meanings,
-    // collocations, word family); the free tier needs less.
-    max_tokens: includeDepth ? 8192 : 4096,
+    // collocations, word family). Free tier is a bit higher than base to fit
+    // the one full-depth "Pro preview" item.
+    max_tokens: includeDepth ? 8192 : 5120,
     system: buildSystemPrompt(includeDepth),
     messages: [
       {

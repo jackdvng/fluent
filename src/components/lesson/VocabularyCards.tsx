@@ -3,19 +3,31 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import SpeakButton from "@/components/SpeakButton";
+import { CHECKOUT_URL } from "@/lib/checkout";
 import type { VocabularyItem } from "@/types/lesson";
 
 const STAGGER_MS = 150;
 
+// A card "has depth" when any of the Pro-only fields are populated.
+function itemHasDepth(item: VocabularyItem): boolean {
+  return (
+    (Array.isArray(item.meanings) && item.meanings.length > 0) ||
+    (Array.isArray(item.collocations) && item.collocations.length > 0) ||
+    (Array.isArray(item.wordFamily) && item.wordFamily.length > 0)
+  );
+}
+
 interface VocabularyCardsProps {
   items: VocabularyItem[];
   onReview?: (word: string) => void;
+  isPro?: boolean;
 }
 
 interface VocabularyCardProps {
   item: VocabularyItem;
   isFlipped: boolean;
   extrasOpen: boolean;
+  isPreview: boolean;
   onSelect: () => void;
   onToggleExtras: () => void;
 }
@@ -24,6 +36,7 @@ function VocabularyCard({
   item,
   isFlipped,
   extrasOpen,
+  isPreview,
   onSelect,
   onToggleExtras,
 }: VocabularyCardProps) {
@@ -66,6 +79,14 @@ function VocabularyCard({
   const wordFamily = Array.isArray(item.wordFamily) ? item.wordFamily : [];
   const hasExtras = collocations.length > 0 || wordFamily.length > 0;
 
+  // Pro-preview tag, positioned identically (top-right) on both card faces.
+  // Deep-amber pill so the yellow ✨ stays clearly visible.
+  const previewTag = isPreview ? (
+    <span className="absolute right-3 top-3 z-10 whitespace-nowrap rounded-full bg-[#F2555A] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#FFFFFF] shadow-sm">
+      ✨ Pro
+    </span>
+  ) : null;
+
   return (
     <div
       role="button"
@@ -83,6 +104,7 @@ function VocabularyCard({
       <div className={`flip-inner ${isFlipped ? "is-flipped" : ""}`}>
         {/* FRONT */}
         <div className="flip-face flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-6 shadow-sm">
+          {previewTag}
           <span className="shrink-0 text-xs font-bold uppercase tracking-wider text-primary">
             Chạm để xem
           </span>
@@ -101,6 +123,7 @@ function VocabularyCard({
 
         {/* BACK */}
         <div className="flip-face flip-back flex flex-col rounded-2xl border-2 border-border bg-highlight p-5 shadow-sm">
+          {previewTag}
           <div className="relative flex min-h-0 flex-1 flex-col">
             <div
               ref={scrollRef}
@@ -108,7 +131,7 @@ function VocabularyCard({
               className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto"
             >
               {/* Header: word + part of speech */}
-              <div className="shrink-0">
+              <div className={`shrink-0 ${isPreview ? "pr-12" : ""}`}>
                 <div className="flex items-center gap-2">
                   <p className="break-words text-base font-bold leading-snug text-heading">
                     {item.word}
@@ -293,6 +316,7 @@ function VocabularyCard({
 export default function VocabularyCards({
   items,
   onReview,
+  isPro = false,
 }: VocabularyCardsProps) {
   const [flippedWord, setFlippedWord] = useState<string | null>(null);
   // Which cards have their extra "depth" details (collocations + word family)
@@ -342,18 +366,41 @@ export default function VocabularyCards({
     });
   }, []);
 
+  // In a free-tier lesson exactly one card carries depth (the "Pro preview").
+  // When every card has depth it's a Pro lesson, so nothing is a preview.
+  const allHaveDepth = items.length > 0 && items.every(itemHasDepth);
+
   return (
-    <div className="grid gap-6 sm:grid-cols-2">
-      {items.map((item) => (
-        <VocabularyCard
-          key={item.word}
-          item={item}
-          isFlipped={flippedWord === item.word}
-          extrasOpen={expandedExtras.has(item.word)}
-          onSelect={() => handleCardClick(item.word)}
-          onToggleExtras={() => toggleExtras(item.word)}
-        />
-      ))}
+    <div>
+      <div className="grid gap-6 sm:grid-cols-2">
+        {items.map((item) => (
+          <VocabularyCard
+            key={item.word}
+            item={item}
+            isFlipped={flippedWord === item.word}
+            extrasOpen={expandedExtras.has(item.word)}
+            isPreview={!isPro && !allHaveDepth && itemHasDepth(item)}
+            onSelect={() => handleCardClick(item.word)}
+            onToggleExtras={() => toggleExtras(item.word)}
+          />
+        ))}
+      </div>
+
+      {/* Single upsell line below the vocabulary section (free users only). */}
+      {!isPro ? (
+        <p className="mt-6 text-center text-sm leading-6 text-body sm:text-left">
+          Bản Pro mở khóa nghĩa mở rộng, cụm từ đi kèm và họ từ vựng cho{" "}
+          <span className="font-bold">mọi từ</span>.{" "}
+          <a
+            href={CHECKOUT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-primary underline-offset-2 transition ease-smooth hover:text-primary-hover hover:underline"
+          >
+            Nâng cấp Pro ☕
+          </a>
+        </p>
+      ) : null}
     </div>
   );
 }
